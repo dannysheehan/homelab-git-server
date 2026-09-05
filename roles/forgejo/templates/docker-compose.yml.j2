@@ -1,0 +1,50 @@
+---
+services:
+  forgejo:
+    image: {{ forgejo_image }}
+    container_name: {{ forgejo_container_name }}
+    restart: {{ forgejo_restart_policy }}
+    pull_policy: missing
+    environment:
+      USER_UID: "{{ forgejo_user_uid }}"
+      USER_GID: "{{ forgejo_user_gid }}"
+      GITEA__database__DB_TYPE: sqlite3
+      FORGEJO__database__DB_TYPE: sqlite3
+      GITEA____APP_NAME: "{{ forgejo_app_name }}"
+      FORGEJO____APP_NAME: "{{ forgejo_app_name }}"
+      GITEA__server__DOMAIN: "{{ forgejo_domain }}"
+      FORGEJO__server__DOMAIN: "{{ forgejo_domain }}"
+      GITEA__server__HTTP_PORT: "3000"
+      FORGEJO__server__HTTP_PORT: "3000"
+      GITEA__server__ROOT_URL: "{{ forgejo_root_url }}"
+      FORGEJO__server__ROOT_URL: "{{ forgejo_root_url }}"
+      GITEA__server__SSH_DOMAIN: "{{ forgejo_domain }}"
+      FORGEJO__server__SSH_DOMAIN: "{{ forgejo_domain }}"
+      GITEA__server__SSH_PORT: "{{ forgejo_ssh_port }}"
+      FORGEJO__server__SSH_PORT: "{{ forgejo_ssh_port }}"
+      GITEA__server__SSH_LISTEN_PORT: "{{ forgejo_ssh_listen_port }}"
+      FORGEJO__server__SSH_LISTEN_PORT: "{{ forgejo_ssh_listen_port }}"
+      GITEA__server__START_SSH_SERVER: "true"
+      FORGEJO__server__START_SSH_SERVER: "true"
+      GITEA__security__INSTALL_LOCK: "{{ forgejo_install_lock | bool | lower }}"
+      FORGEJO__security__INSTALL_LOCK: "{{ forgejo_install_lock | bool | lower }}"
+      GITEA__service__DISABLE_REGISTRATION: "{{ forgejo_disable_registration | bool | lower }}"
+      FORGEJO__service__DISABLE_REGISTRATION: "{{ forgejo_disable_registration | bool | lower }}"
+    volumes:
+      - "{{ forgejo_install_path }}/data:/data"
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "{{ forgejo_web_port }}:3000"
+      - "{{ forgejo_ssh_port }}:{{ forgejo_ssh_listen_port }}"
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://127.0.0.1:3000/api/healthz
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s

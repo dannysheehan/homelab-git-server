@@ -1,0 +1,15 @@
+---
+- name: Import preflight tasks
+  ansible.builtin.import_tasks: preflight.yml
+  tags:
+    - preflight
+
+- name: Import deploy tasks
+  ansible.builtin.import_tasks: deploy.yml
+  tags:
+    - deploy
+
+- name: Import administrator tasks
+  ansible.builtin.import_tasks: admin.yml
+  tags:
+    - admin

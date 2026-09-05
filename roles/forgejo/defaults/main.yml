@@ -1,0 +1,40 @@
+---
+# Image and process
+forgejo_version: "10"
+forgejo_image: "codeberg.org/forgejo/forgejo:{{ forgejo_version }}"
+forgejo_container_name: forgejo
+forgejo_cli_binary: gitea
+forgejo_restart_policy: always
+
+# Host paths and ports (Synology Container Manager defaults)
+forgejo_install_path: /volume1/docker/forgejo
+forgejo_web_port: 3000
+# Host publish port and clone URL port (external)
+forgejo_ssh_port: 2222
+# In-container listen port (must be >1023 when USER_UID is non-root)
+forgejo_ssh_listen_port: 2222
+forgejo_domain: localhost
+forgejo_root_url: "http://{{ forgejo_domain }}:{{ forgejo_web_port }}/"
+forgejo_app_name: Forgejo
+
+# Container process identity (DSM user that owns the data volume)
+forgejo_user_uid: 1026
+forgejo_user_gid: 100
+
+# Docker CLI on DSM lives outside PATH for non-login SSH
+forgejo_docker_cli: /usr/local/bin/docker
+forgejo_docker_sock: /var/run/docker.sock
+forgejo_become: true
+forgejo_pull: missing
+forgejo_recreate: auto
+forgejo_wait: true
+forgejo_wait_timeout: 120
+
+# Converge instance config on every start (Gitea/Forgejo env -> app.ini)
+forgejo_install_lock: true
+forgejo_disable_registration: true
+
+# Administrator (password comes from vault_forgejo_admin_password)
+forgejo_admin_username: ""
+forgejo_admin_email: ""
+forgejo_admin_must_change_password: false

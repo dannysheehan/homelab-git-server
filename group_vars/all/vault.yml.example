@@ -1,0 +1,5 @@
+---
+# Encrypt before committing if you choose to track this file:
+#   ansible-vault encrypt group_vars/all/vault.yml
+# Prefer leaving vault.yml untracked (see .gitignore) and copying this example locally.
+vault_forgejo_admin_password: "change-me-to-a-strong-password"

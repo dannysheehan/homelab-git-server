@@ -1,0 +1,48 @@
+---
+- name: Ensure Forgejo directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ forgejo_user_uid }}"
+    group: "{{ forgejo_user_gid }}"
+    mode: "0755"
+  loop:
+    - "{{ forgejo_install_path }}"
+    - "{{ forgejo_install_path }}/data"
+  become: "{{ forgejo_become }}"
+
+- name: Report first-run actions skipped in check mode
+  ansible.builtin.debug:
+    msg: >-
+      Check mode: {{ forgejo_install_path }} does not exist yet.
+      A real run would create the data directory, write docker-compose.yml,
+      and start the {{ forgejo_container_name }} container.
+  when:
+    - ansible_check_mode | bool
+    - not forgejo_install_stat.stat.exists
+
+- name: Render docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ forgejo_install_path }}/docker-compose.yml"
+    owner: "{{ forgejo_user_uid }}"
+    group: "{{ forgejo_user_gid }}"
+    mode: "0644"
+  become: "{{ forgejo_become }}"
+  diff: true
+  when: not ansible_check_mode or forgejo_install_stat.stat.exists
+
+- name: Deploy Forgejo container stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ forgejo_install_path }}"
+    project_name: "{{ forgejo_container_name }}"
+    files:
+      - docker-compose.yml
+    docker_cli: "{{ forgejo_docker_cli }}"
+    state: present
+    pull: "{{ forgejo_pull }}"
+    recreate: "{{ forgejo_recreate }}"
+    wait: "{{ forgejo_wait }}"
+    wait_timeout: "{{ forgejo_wait_timeout | int }}"
+  become: "{{ forgejo_become }}"
+  when: not ansible_check_mode or forgejo_install_stat.stat.exists

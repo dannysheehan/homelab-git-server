@@ -1,0 +1,48 @@
+---
+- name: Assert required Forgejo configuration
+  ansible.builtin.assert:
+    that:
+      - forgejo_domain is defined
+      - forgejo_domain | length > 0
+      - forgejo_install_path is defined
+      - forgejo_install_path | length > 0
+      - forgejo_web_port | int > 0
+      - forgejo_ssh_port | int > 0
+      - forgejo_user_uid is defined
+      - forgejo_user_gid is defined
+      - forgejo_docker_cli is defined
+    fail_msg: >-
+      Set forgejo_domain, forgejo_install_path, ports, UID/GID, and
+      forgejo_docker_cli in group_vars (see group_vars/all/vars.yml.example).
+
+- name: Assert administrator secrets when install lock is enabled
+  ansible.builtin.assert:
+    that:
+      - forgejo_admin_username | length > 0
+      - forgejo_admin_email | length > 0
+      - vault_forgejo_admin_password is defined
+      - vault_forgejo_admin_password | length > 0
+    fail_msg: >-
+      forgejo_install_lock is true, so an administrator must be created.
+      Set forgejo_admin_username and forgejo_admin_email in vars, and
+      vault_forgejo_admin_password in group_vars/all/vault.yml
+      (see vault.yml.example).
+  when: forgejo_install_lock | bool
+
+- name: Stat Forgejo install path
+  ansible.builtin.stat:
+    path: "{{ forgejo_install_path }}"
+  register: forgejo_install_stat
+
+- name: Stat Docker socket
+  ansible.builtin.stat:
+    path: "{{ forgejo_docker_sock }}"
+  register: forgejo_docker_sock_stat
+
+- name: Assert Docker socket exists
+  ansible.builtin.assert:
+    that:
+      - forgejo_docker_sock_stat.stat.exists
+    fail_msg: >-
+      Docker socket {{ forgejo_docker_sock }} is missing.
+      Install and start Synology Container Manager.

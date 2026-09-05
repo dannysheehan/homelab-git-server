@@ -1,0 +1,6 @@
+---
+- name: Deploy Forgejo on Synology NAS
+  hosts: synology_nas
+  gather_facts: false
+  roles:
+    - forgejo

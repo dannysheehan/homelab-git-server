@@ -1,0 +1,19 @@
+*.retry
+*.log
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+.vault_pass
+.vault_pass.txt
+
+# Local site identity — copy from *.example before first run
+inventory.ini
+group_vars/all/vars.yml
+group_vars/all/vault.yml
+
+# Local overrides
+*local.yml
+*local.yaml
+group_vars/**/local.yml
+group_vars/**/local.yaml

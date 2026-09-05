@@ -1,0 +1,5 @@
+# ansible-lint
+profile: production
+exclude_paths:
+  - .venv/
+  - .github/

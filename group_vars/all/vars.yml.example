@@ -1,0 +1,24 @@
+---
+# Connection (set these for your NAS; do not commit real values)
+ansible_host: nas.example.com
+ansible_user: your_ssh_user
+ansible_python_interpreter: /var/packages/Python3.9/target/usr/bin/python3
+
+# Forgejo instance
+forgejo_domain: git.example.com
+forgejo_version: "10"
+forgejo_install_path: /volume1/docker/forgejo
+forgejo_web_port: 3000
+forgejo_ssh_port: 2222          # host publish + clone URL
+forgejo_ssh_listen_port: 2222   # in-container listen (>1023 if non-root UID)
+forgejo_root_url: "http://{{ forgejo_domain }}:{{ forgejo_web_port }}/"
+
+# Container process identity (DSM user that owns the data volume)
+forgejo_user_uid: 1026
+forgejo_user_gid: 100
+
+# Administrator created when forgejo_install_lock is true
+# Password belongs in vault.yml as vault_forgejo_admin_password
+forgejo_admin_username: admin
+forgejo_admin_email: admin@example.com
+forgejo_admin_must_change_password: false

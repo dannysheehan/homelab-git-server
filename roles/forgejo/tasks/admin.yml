@@ -1,0 +1,45 @@
+---
+- name: Report administrator creation skipped in check mode
+  ansible.builtin.debug:
+    msg: >-
+      Check mode: would ensure Forgejo administrator
+      '{{ forgejo_admin_username }}' exists.
+  when:
+    - ansible_check_mode | bool
+    - forgejo_install_lock | bool
+    - forgejo_admin_username | length > 0
+
+- name: Create Forgejo administrator
+  ansible.builtin.command:
+    argv:
+      - "{{ forgejo_docker_cli }}"
+      - exec
+      - --user
+      - git
+      - "{{ forgejo_container_name }}"
+      - "{{ forgejo_cli_binary }}"
+      - admin
+      - user
+      - create
+      - --admin
+      - --username
+      - "{{ forgejo_admin_username }}"
+      - --password
+      - "{{ vault_forgejo_admin_password }}"
+      - --email
+      - "{{ forgejo_admin_email }}"
+      - "--must-change-password={{ forgejo_admin_must_change_password | bool | lower }}"
+  become: "{{ forgejo_become }}"
+  register: forgejo_admin_create
+  changed_when: forgejo_admin_create.rc == 0
+  failed_when:
+    - forgejo_admin_create.rc != 0
+    - "'already used' not in (forgejo_admin_create.stderr | default('') ~ forgejo_admin_create.stdout | default(''))"
+    - "'already exists' not in (forgejo_admin_create.stderr | default('') ~ forgejo_admin_create.stdout | default(''))"
+  no_log: true
+  when:
+    - not ansible_check_mode
+    - forgejo_install_lock | bool
+    - forgejo_admin_username | length > 0
+    - vault_forgejo_admin_password is defined
+    - vault_forgejo_admin_password | length > 0
